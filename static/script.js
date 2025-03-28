@@ -29,3 +29,16 @@ function trimiteMesaj(text){
         window.speechSynthesis.speak(speech);
     });
 }
+
+setInterval(() => {
+    fetch('/verifica-evenimente')
+    .then(res => res.json())
+    .then(data => {
+        if (data.mesaj) {
+            const speech = new SpeechSynthesisUtterance(data.mesaj);
+            speech.lang = 'ro-RO';
+            window.speechSynthesis.speak(speech);
+            alert(data.mesaj);
+        }
+    });
+}, 60000);

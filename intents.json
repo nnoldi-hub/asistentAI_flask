@@ -2,16 +2,15 @@
 {
   "intents": [
     {
-      "tag": "calendar_azi",
+      "tag": "adauga_eveniment",
       "patterns": [
-        "ce am azi",
-        "agenda de azi",
-        "ce evenimente am programate",
-        "programul meu de azi"
+        "notează întâlnire vineri la 10",
+        "adaugă eveniment mâine ora 14:00",
+        "pune în calendar întâlnire cu Andrei la ora 15",
+        "scrie programare joi ora 8"
       ],
       "responses": [
-        "Ai o întâlnire la ora 10:00.",
-        "Astăzi ai o programare importantă la ora 15:00."
+        "Am notat evenimentul!"
       ]
     },
     {
