@@ -38,3 +38,15 @@ def ai_reply():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    @app.route('/admin')
+def admin():
+    convs = Conversatie.query.all()
+    return render_template('admin.html', conversatii=convs)
+
+@app.route('/update/<int:id>', methods=['POST'])
+def update(id):
+    conv = Conversatie.query.get(id)
+    conv.raspuns = request.form['raspuns']
+    db.session.commit()
+    return jsonify({"status": "actualizat"})
+
