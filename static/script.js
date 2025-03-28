@@ -8,7 +8,6 @@ document.querySelector("#btnVorbeste").onclick = () => {
     const recognition = new webkitSpeechRecognition();
     recognition.lang = 'ro-RO';
     recognition.start();
-
     recognition.onresult = (event) => {
         const spokenText = event.results[0][0].transcript;
         document.querySelector("#mesaj").value = spokenText;

@@ -1,0 +1,31 @@
+
+{
+  "intents": [
+    {
+      "tag": "calendar_azi",
+      "patterns": [
+        "ce am azi",
+        "agenda de azi",
+        "ce evenimente am programate",
+        "programul meu de azi"
+      ],
+      "responses": [
+        "Ai o întâlnire la ora 10:00.",
+        "Astăzi ai o programare importantă la ora 15:00."
+      ]
+    },
+    {
+      "tag": "salut",
+      "patterns": [
+        "salut",
+        "bună",
+        "hei",
+        "ce faci"
+      ],
+      "responses": [
+        "Salut! Cu ce te pot ajuta?",
+        "Bună! Sunt gata să te ajut."
+      ]
+    }
+  ]
+}
