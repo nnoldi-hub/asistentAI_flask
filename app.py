@@ -5,7 +5,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ai.db'
 db = SQLAlchemy(app)
 
-# Definirea structurii tabelului pentru conversații
 class Conversatie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     intrebare = db.Column(db.String(500))
@@ -21,14 +20,11 @@ def home():
 @app.route('/ai', methods=['POST'])
 def ai_reply():
     user_input = request.json.get('mesaj')
-
-    # Căutare simplă a răspunsului în baza de date
     conv = Conversatie.query.filter(Conversatie.intrebare.ilike(f"%{user_input}%")).first()
 
     if conv:
         raspuns = conv.raspuns
     else:
-        # Dacă nu găsim răspuns, salvăm întrebarea pentru a învăța ulterior
         raspuns = "Momentan nu știu, dar voi învăța."
         noua_conv = Conversatie(intrebare=user_input, raspuns=raspuns)
         db.session.add(noua_conv)
@@ -36,9 +32,7 @@ def ai_reply():
 
     return jsonify({"raspuns": raspuns})
 
-if __name__ == '__main__':
-    app.run(debug=True)
-    @app.route('/admin')
+@app.route('/admin')
 def admin():
     convs = Conversatie.query.all()
     return render_template('admin.html', conversatii=convs)
@@ -50,3 +44,5 @@ def update(id):
     db.session.commit()
     return jsonify({"status": "actualizat"})
 
+if __name__ == '__main__':
+    app.run(debug=True)
