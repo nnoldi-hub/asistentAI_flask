@@ -1,16 +1,17 @@
-from flask import Flask, jsonify, request
+
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return jsonify({"mesaj": "Salut, AI-ul tău Flask rulează pe Render.com!"})
+    return render_template('index.html')
 
 @app.route('/ai', methods=['POST'])
 def ai_reply():
     user_input = request.json.get('mesaj')
-    # aici vei integra ulterior logica AI-ului
-    return jsonify({"raspuns": f"AI-ul a primit mesajul: {user_input}"})
+    raspuns = f"AI-ul a primit mesajul: {user_input}"
+    return jsonify({"raspuns": raspuns})
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
