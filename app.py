@@ -1,82 +1,78 @@
 
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-import pickle, random
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-import dateparser
 
 app = Flask(__name__)
-app.secret_key = 'secret_key_super_puternic'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ai.db'
+app.secret_key = 'cheie_super_secreta'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ai_multi.db'
 db = SQLAlchemy(app)
+
+class Utilizator(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nume = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    parola = db.Column(db.String(200), nullable=False)
 
 class Eveniment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    mesaj_original = db.Column(db.String(500))
-    data_ora = db.Column(db.DateTime)
+    user_id = db.Column(db.Integer, db.ForeignKey('utilizator.id'), nullable=False)
+    mesaj = db.Column(db.String(500), nullable=False)
+    data_ora = db.Column(db.DateTime, nullable=False)
 
 with app.app_context():
     db.create_all()
 
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
-responses = pickle.load(open("responses.pkl", "rb"))
-
 @app.route('/')
-def home():
-    return render_template("index.html")
+def index():
+    if 'user_id' in session:
+        evenimente = Eveniment.query.filter_by(user_id=session['user_id']).order_by(Eveniment.data_ora).all()
+        return render_template('dashboard.html', evenimente=evenimente)
+    return redirect(url_for('login'))
 
-@app.route('/ai', methods=['POST'])
-def ai_reply():
-    user_input = request.json.get('mesaj')
-    input_vec = vectorizer.transform([user_input])
-    tag = model.predict(input_vec)[0]
-
-    if tag == "adauga_eveniment":
-        data_extrasa = dateparser.parse(user_input, languages=['ro'])
-        if data_extrasa:
-            eveniment = Eveniment(mesaj_original=user_input, data_ora=data_extrasa)
-            db.session.add(eveniment)
-            db.session.commit()
-            raspuns = "Am salvat evenimentul pentru " + data_extrasa.strftime("%A, %d %B %Y ora %H:%M")
-        else:
-            raspuns = "Nu am putut înțelege data. Poți reformula?"
-    else:
-        raspuns = random.choice(responses[tag])
-
-    return jsonify({"raspuns": raspuns})
-
-@app.route('/verifica-evenimente')
-def verifica_evenimente():
-    acum = datetime.now()
-    urmator = Eveniment.query.filter(Eveniment.data_ora > acum).order_by(Eveniment.data_ora).first()
-    if urmator and (urmator.data_ora - acum).total_seconds() < 300:
-        return jsonify({"mesaj": f"🔔 Reminder: {urmator.mesaj_original}"})
-    return jsonify({})
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        nume = request.form['nume']
+        email = request.form['email']
+        parola = request.form['parola']
+        parola_hash = generate_password_hash(parola)
+        user = Utilizator(nume=nume, email=email, parola=parola_hash)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         parola = request.form['parola']
-        if username == 'admin' and parola == 'admin123':
-            session['user'] = 'admin'
-            return redirect(url_for('admin'))
+        user = Utilizator.query.filter_by(email=email).first()
+        if user and check_password_hash(user.parola, parola):
+            session['user_id'] = user.id
+            session['user_nume'] = user.nume
+            return redirect(url_for('index'))
         else:
-            return render_template('login.html', eroare="Date incorecte!")
+            return render_template('login.html', eroare="Date incorecte.")
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
+    session.clear()
     return redirect(url_for('login'))
 
-@app.route('/admin')
-def admin():
-    if 'user' not in session:
+@app.route('/adauga_eveniment', methods=['POST'])
+def adauga_eveniment():
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-    evenimente = Eveniment.query.order_by(Eveniment.data_ora).all()
-    return render_template('admin.html', evenimente=evenimente)
+    mesaj = request.form['mesaj']
+    data_ora = datetime.strptime(request.form['data_ora'], "%Y-%m-%dT%H:%M")
+    ev = Eveniment(user_id=session['user_id'], mesaj=mesaj, data_ora=data_ora)
+    db.session.add(ev)
+    db.session.commit()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

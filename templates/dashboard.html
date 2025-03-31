@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>Evenimentele Mele</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2>Salut, {{ session['user_nume'] }}!</h2>
+    <a href="/logout" class="btn btn-danger btn-sm mb-3">Logout</a>
+    <h4>📅 Evenimentele tale:</h4>
+    <table class="table table-bordered bg-white">
+        <thead><tr><th>Mesaj</th><th>Data/Ora</th></tr></thead>
+        <tbody>
+        {% for ev in evenimente %}
+        <tr><td>{{ ev.mesaj }}</td><td>{{ ev.data_ora }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h4 class="mt-4">➕ Adaugă un eveniment</h4>
+    <form method="post" action="/adauga_eveniment">
+        <input type="text" name="mesaj" class="form-control mb-2" placeholder="Descriere eveniment" required>
+        <input type="datetime-local" name="data_ora" class="form-control mb-2" required>
+        <button class="btn btn-success">Salvează</button>
+    </form>
+</div>
+</body>
+</html>

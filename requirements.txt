@@ -1,5 +1,4 @@
 Flask
 Flask_SQLAlchemy
 gunicorn
-scikit-learn
-dateparser
+Werkzeug
