@@ -1,16 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-import pickle, random
-import dateparser
+from datetime import datetime, timedelta
+from dateutil.parser import parse as date_parse
+import pickle, random, spacy
 
 app = Flask(__name__)
 app.secret_key = 'cheie_super_secreta'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ai_unificat.db'
 db = SQLAlchemy(app)
 
-# Modele
+nlp = spacy.load("ro_core_news_sm")
+
 class Utilizator(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nume = db.Column(db.String(100), nullable=False)
@@ -26,12 +27,28 @@ class Eveniment(db.Model):
 with app.app_context():
     db.create_all()
 
-# Încărcăm AI-ul
 model = pickle.load(open("model.pkl", "rb"))
 vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
 responses = pickle.load(open("responses.pkl", "rb"))
 
-# Rute
+def detecteaza_data(text):
+    doc = nlp(text)
+    azi = datetime.now()
+    text = text.lower()
+
+    if "mâine" in text:
+        ora = [t.text for t in doc if t.like_num]
+        return azi + timedelta(days=1, hours=int(ora[0]) if ora else 10)
+
+    if "poimâine" in text:
+        ora = [t.text for t in doc if t.like_num]
+        return azi + timedelta(days=2, hours=int(ora[0]) if ora else 10)
+
+    try:
+        return date_parse(text, fuzzy=True, dayfirst=True)
+    except:
+        return None
+
 @app.route('/')
 def index():
     if 'admin' in session:
@@ -85,7 +102,7 @@ def ai():
     tag = model.predict(input_vec)[0]
 
     if tag == "adauga_eveniment":
-        data_extrasa = dateparser.parse(mesaj, languages=["ro"])
+        data_extrasa = detecteaza_data(mesaj)
         if data_extrasa:
             ev = Eveniment(user_id=session['user_id'], mesaj=mesaj, data_ora=data_extrasa)
             db.session.add(ev)
