@@ -13,6 +13,13 @@
 </div>
 
 <h5 class="mt-5">🗂️ Istoric conversații:</h5>
+<div class="mb-3 d-flex justify-content-between">
+    <input id="searchBox" onkeyup="filtreaza()" class="form-control w-50" placeholder="Caută în mesaje...">
+    <div>
+        <a href="/export_csv" class="btn btn-outline-secondary btn-sm">📄 CSV</a>
+        <a href="/export_pdf" class="btn btn-outline-secondary btn-sm">🧾 PDF</a>
+    </div>
+</div>
 <table class="table table-sm table-striped bg-white"><thead><tr><th>Mesaj</th><th>Răspuns</th><th>Data</th></tr></thead><tbody>
 {% for c in conversatii %}
 <tr><td>{{ c.mesaj }}</td><td>{{ c.raspuns }}</td><td>{{ c.data_ora }}</td></tr>
@@ -42,3 +49,12 @@ function vorbeste(){
   rec.onresult=(e)=>{ document.getElementById("mesaj").value=e.results[0][0].transcript; trimite(); };
 }
 </script></body></html>
+<script>
+function filtreaza(){
+    let input = document.getElementById("searchBox").value.toLowerCase();
+    let rows = document.querySelectorAll("table tbody tr");
+    rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(input) ? "" : "none";
+    });
+}
+</script>

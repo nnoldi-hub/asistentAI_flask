@@ -6,3 +6,4 @@ Werkzeug
 spacy
 python-dateutil
 ro-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/ro_core_news_sm-3.5.0/ro_core_news_sm-3.5.0-py3-none-any.whl
+reportlab

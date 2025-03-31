@@ -133,3 +133,47 @@ def admin():
     utilizatori = Utilizator.query.all()
     evenimente = Eveniment.query.order_by(Eveniment.data_ora).all()
     return render_template("admin.html", utilizatori=utilizatori, evenimente=evenimente)
+
+from flask import Response
+import csv
+from io import StringIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
+@app.route('/export_csv')
+def export_csv():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Mesaj", "Raspuns", "Data/Ora"])
+    convs = Conversatie.query.filter_by(user_id=session['user_id']).all()
+    for c in convs:
+        writer.writerow([c.mesaj, c.raspuns, c.data_ora])
+    output.seek(0)
+    return Response(output, mimetype="text/csv", headers={"Content-Disposition":"attachment;filename=istoric.csv"})
+
+@app.route('/export_pdf')
+def export_pdf():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    output = StringIO()
+    pdf_path = "/tmp/conversatii.pdf"
+    c = canvas.Canvas(pdf_path, pagesize=letter)
+    text_obj = c.beginText(40, 750)
+    text_obj.setFont("Helvetica", 10)
+    convs = Conversatie.query.filter_by(user_id=session['user_id']).all()
+    for conv in convs:
+        text_obj.textLine(f"{conv.data_ora} | {conv.mesaj} -> {conv.raspuns}")
+    c.drawText(text_obj)
+    c.showPage()
+    c.save()
+    with open(pdf_path, "rb") as pdf:
+        return Response(pdf.read(), mimetype="application/pdf", headers={"Content-Disposition": "attachment;filename=istoric.pdf"})
+
+@app.route('/admin/conversatii')
+def admin_conversatii():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    convs = Conversatie.query.order_by(Conversatie.data_ora.desc()).limit(100).all()
+    return render_template("admin_conversatii.html", conversatii=convs)
