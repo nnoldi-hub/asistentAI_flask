@@ -2,7 +2,9 @@ services:
   - type: web
     name: asistent-ai-flask
     env: python
-    buildCommand: pip install -r requirements.txt && python -m spacy download ro_core_news_sm
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m spacy download ro_core_news_sm
     startCommand: gunicorn app:app
     plan: free
     autoDeploy: true
