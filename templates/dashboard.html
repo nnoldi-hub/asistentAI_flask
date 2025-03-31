@@ -12,6 +12,13 @@
 <button class="btn btn-success" onclick="vorbeste()">🎤</button>
 </div>
 
+<h5 class="mt-5">🗂️ Istoric conversații:</h5>
+<table class="table table-sm table-striped bg-white"><thead><tr><th>Mesaj</th><th>Răspuns</th><th>Data</th></tr></thead><tbody>
+{% for c in conversatii %}
+<tr><td>{{ c.mesaj }}</td><td>{{ c.raspuns }}</td><td>{{ c.data_ora }}</td></tr>
+{% endfor %}
+</tbody></table>
+
 <h5>📅 Evenimente:</h5>
 <table class="table table-bordered bg-white"><thead><tr><th>Mesaj</th><th>Data</th></tr></thead><tbody>
 {% for ev in evenimente %}<tr><td>{{ ev.mesaj }}</td><td>{{ ev.data_ora }}</td></tr>{% endfor %}

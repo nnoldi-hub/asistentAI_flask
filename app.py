@@ -18,6 +18,13 @@ class Utilizator(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     parola = db.Column(db.String(200), nullable=False)
 
+class Conversatie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('utilizator.id'))
+    mesaj = db.Column(db.String(500))
+    raspuns = db.Column(db.String(500))
+    data_ora = db.Column(db.DateTime, default=datetime.now)
+
 class Eveniment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('utilizator.id'), nullable=True)
@@ -55,7 +62,8 @@ def index():
         return redirect(url_for('admin'))
     if 'user_id' in session:
         evenimente = Eveniment.query.filter_by(user_id=session['user_id']).order_by(Eveniment.data_ora).all()
-        return render_template("dashboard.html", evenimente=evenimente)
+    conversatii = Conversatie.query.filter_by(user_id=session['user_id']).order_by(Conversatie.data_ora.desc()).limit(10).all().order_by(Eveniment.data_ora).all()
+        return render_template("dashboard.html", evenimente=evenimente, conversatii=conversatii)
     return redirect(url_for('login'))
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -112,6 +120,10 @@ def ai():
             raspuns = "❌ Nu am putut înțelege data."
     else:
         raspuns = random.choice(responses[tag])
+    
+    conv = Conversatie(user_id=session['user_id'], mesaj=mesaj, raspuns=raspuns)
+    db.session.add(conv)
+    db.session.commit()
     return jsonify({"raspuns": raspuns})
 
 @app.route('/admin')
