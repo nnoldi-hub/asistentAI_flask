@@ -1,29 +1,18 @@
 {
   "intents": [
     {
+      "tag": "salut",
+      "patterns": ["salut", "hei", "bună", "ce faci"],
+      "responses": ["Salut! Cu ce te pot ajuta?", "Bun venit! Ce pot face pentru tine?"]
+    },
+    {
       "tag": "adauga_eveniment",
       "patterns": [
         "notează întâlnire vineri la 10",
         "adaugă eveniment mâine ora 14:00",
-        "pune în calendar întâlnire cu Andrei la ora 15",
         "scrie programare joi ora 8"
       ],
-      "responses": [
-        "Am adăugat evenimentul în calendar."
-      ]
-    },
-    {
-      "tag": "salut",
-      "patterns": [
-        "salut",
-        "bună",
-        "hei",
-        "ce faci"
-      ],
-      "responses": [
-        "Salut! Cu ce te pot ajuta?",
-        "Bună! Sunt aici să te asist."
-      ]
+      "responses": ["Evenimentul a fost adăugat!"]
     }
   ]
 }
