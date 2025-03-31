@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: asistentAI_flask
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -b 0.0.0.0:5000 app:app # asigură-te că punctul de intrare este corect
+    envVars:
+      - key: FLASK_ENV
+        value: production
