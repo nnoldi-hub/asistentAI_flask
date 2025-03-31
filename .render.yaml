@@ -6,4 +6,3 @@ services:
     startCommand: gunicorn app:app
     plan: free
     autoDeploy: true
-    
