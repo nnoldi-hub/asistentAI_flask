@@ -1,12 +1,41 @@
-
 <!DOCTYPE html>
 <html>
-<head><title>Evenimentele Mele</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head>
+<head>
+    <title>Asistent AI - Chat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .chat-box {
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 8px;
+        }
+        .user { font-weight: bold; color: #0d6efd; }
+        .ai { font-weight: bold; color: #198754; }
+    </style>
+</head>
 <body class="bg-light">
-<div class="container py-5">
-    <h2>Salut, {{ session['user_nume'] }}!</h2>
+<div class="container py-4">
+    <h2>Bun venit, {{ session['user_nume'] }}!</h2>
     <a href="/logout" class="btn btn-danger btn-sm mb-3">Logout</a>
+
+    <div class="chat-box" id="chatBox">
+        <div class="text-muted">Conversație cu asistentul tău personal:</div>
+    </div>
+
+    <div class="input-group mb-3">
+        <input type="text" id="mesaj" class="form-control" placeholder="Scrie un mesaj...">
+        <button class="btn btn-primary" onclick="trimiteMesaj()">Trimite</button>
+        <button class="btn btn-success" onclick="vorbeste()">🎤 Vorbește</button>
+    </div>
+
+    <hr>
     <h4>📅 Evenimentele tale:</h4>
     <table class="table table-bordered bg-white">
         <thead><tr><th>Mesaj</th><th>Data/Ora</th></tr></thead>
@@ -16,13 +45,47 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <h4 class="mt-4">➕ Adaugă un eveniment</h4>
-    <form method="post" action="/adauga_eveniment">
-        <input type="text" name="mesaj" class="form-control mb-2" placeholder="Descriere eveniment" required>
-        <input type="datetime-local" name="data_ora" class="form-control mb-2" required>
-        <button class="btn btn-success">Salvează</button>
-    </form>
 </div>
+
+<script>
+function adaugaMesaj(tip, text) {
+    const box = document.getElementById("chatBox");
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.innerHTML = `<span class="${tip}">${tip === 'user' ? 'Tu' : 'AI'}:</span> ${text}`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function trimiteMesaj() {
+    const text = document.getElementById("mesaj").value;
+    if (!text) return;
+    adaugaMesaj("user", text);
+    document.getElementById("mesaj").value = "";
+    fetch("/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mesaj: text })
+    })
+    .then(res => res.json())
+    .then(data => {
+        adaugaMesaj("ai", data.raspuns);
+        const speech = new SpeechSynthesisUtterance(data.raspuns);
+        speech.lang = 'ro-RO';
+        window.speechSynthesis.speak(speech);
+    });
+}
+
+function vorbeste() {
+    const rec = new webkitSpeechRecognition();
+    rec.lang = "ro-RO";
+    rec.start();
+    rec.onresult = function(event) {
+        const rezultat = event.results[0][0].transcript;
+        document.getElementById("mesaj").value = rezultat;
+        trimiteMesaj();
+    };
+}
+</script>
 </body>
 </html>

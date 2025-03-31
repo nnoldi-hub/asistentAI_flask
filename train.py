@@ -1,4 +1,3 @@
-
 import json
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
@@ -9,7 +8,6 @@ with open("intents.json", "r", encoding="utf-8") as file:
 
 training_sentences = []
 training_labels = []
-labels = []
 responses = {}
 
 for intent in data["intents"]:
@@ -17,8 +15,6 @@ for intent in data["intents"]:
         training_sentences.append(pattern)
         training_labels.append(intent["tag"])
     responses[intent["tag"]] = intent["responses"]
-    if intent["tag"] not in labels:
-        labels.append(intent["tag"])
 
 vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(training_sentences)

@@ -1,8 +1,9 @@
-
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import pickle, random
+import dateparser
 
 app = Flask(__name__)
 app.secret_key = 'cheie_super_secreta'
@@ -23,6 +24,11 @@ class Eveniment(db.Model):
 
 with app.app_context():
     db.create_all()
+
+# Load NLP model
+model = pickle.load(open("model.pkl", "rb"))
+vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+responses = pickle.load(open("responses.pkl", "rb"))
 
 @app.route('/')
 def index():
@@ -74,5 +80,24 @@ def adauga_eveniment():
     db.session.commit()
     return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/ai', methods=['POST'])
+def ai():
+    if 'user_id' not in session:
+        return jsonify({"raspuns": "Trebuie să fii autentificat!"})
+    mesaj = request.json.get('mesaj')
+    input_vec = vectorizer.transform([mesaj])
+    tag = model.predict(input_vec)[0]
+
+    if tag == "adauga_eveniment":
+        data_extrasa = dateparser.parse(mesaj, languages=['ro'])
+        if data_extrasa:
+            ev = Eveniment(user_id=session['user_id'], mesaj=mesaj, data_ora=data_extrasa)
+            db.session.add(ev)
+            db.session.commit()
+            raspuns = "✅ Eveniment salvat pentru " + data_extrasa.strftime("%d-%m-%Y ora %H:%M")
+        else:
+            raspuns = "❌ Nu am putut înțelege data și ora."
+    else:
+        raspuns = random.choice(responses[tag])
+
+    return jsonify({"raspuns": raspuns})

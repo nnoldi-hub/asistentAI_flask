@@ -1,4 +1,3 @@
-
 {
   "intents": [
     {
@@ -10,7 +9,7 @@
         "scrie programare joi ora 8"
       ],
       "responses": [
-        "Am notat evenimentul!"
+        "Am adăugat evenimentul în calendar."
       ]
     },
     {
@@ -23,7 +22,7 @@
       ],
       "responses": [
         "Salut! Cu ce te pot ajuta?",
-        "Bună! Sunt gata să te ajut."
+        "Bună! Sunt aici să te asist."
       ]
     }
   ]
