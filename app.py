@@ -191,3 +191,34 @@ def admin_statistici():
     labels = [str(row[0]) for row in statistici]
     values = [row[1] for row in statistici]
     return render_template("admin_statistici.html", labels=labels, values=values)
+
+
+@app.route('/export_evenimente_csv')
+def export_evenimente_csv():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Data/Ora", "Descriere"])
+    evenimente = Eveniment.query.filter_by(user_id=session['user_id']).order_by(Eveniment.data_ora).all()
+    for ev in evenimente:
+        writer.writerow([ev.data_ora.strftime('%Y-%m-%d %H:%M'), ev.mesaj])
+    output.seek(0)
+    return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=calendar.csv"})
+
+@app.route('/export_evenimente_pdf')
+def export_evenimente_pdf():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    pdf_path = "/tmp/calendar.pdf"
+    c = canvas.Canvas(pdf_path, pagesize=letter)
+    text = c.beginText(40, 750)
+    text.setFont("Helvetica", 10)
+    evenimente = Eveniment.query.filter_by(user_id=session['user_id']).order_by(Eveniment.data_ora).all()
+    for ev in evenimente:
+        text.textLine(f"{ev.data_ora.strftime('%Y-%m-%d %H:%M')} - {ev.mesaj}")
+    c.drawText(text)
+    c.showPage()
+    c.save()
+    with open(pdf_path, "rb") as pdf:
+        return Response(pdf.read(), mimetype="application/pdf", headers={"Content-Disposition": "attachment;filename=calendar.pdf"})

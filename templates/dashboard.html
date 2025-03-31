@@ -26,6 +26,11 @@
 {% endfor %}
 </tbody></table>
 
+<h5 class="mt-5">📅 Agenda personală</h5>
+<div class="mb-2 d-flex justify-content-end">
+    <a href="/export_evenimente_csv" class="btn btn-outline-secondary btn-sm me-2">📄 Export CSV</a>
+    <a href="/export_evenimente_pdf" class="btn btn-outline-secondary btn-sm">🧾 Export PDF</a>
+</div>
 <h5>📅 Evenimente:</h5>
 <table class="table table-bordered bg-white"><thead><tr><th>Mesaj</th><th>Data</th></tr></thead><tbody>
 {% for ev in evenimente %}<tr><td>{{ ev.mesaj }}</td><td>{{ ev.data_ora }}</td></tr>{% endfor %}
