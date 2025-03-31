@@ -63,7 +63,7 @@ def index():
     if 'user_id' in session:
         evenimente = Eveniment.query.filter_by(user_id=session['user_id']).order_by(Eveniment.data_ora).all()
     conversatii = Conversatie.query.filter_by(user_id=session['user_id']).order_by(Conversatie.data_ora.desc()).limit(10).all().order_by(Eveniment.data_ora).all()
-        return render_template("dashboard.html", evenimente=evenimente, conversatii=conversatii)
+    return render_template("dashboard.html", evenimente=evenimente, conversatii=conversatii)
     return redirect(url_for('login'))
 
 @app.route('/register', methods=['GET', 'POST'])
