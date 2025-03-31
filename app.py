@@ -177,3 +177,17 @@ def admin_conversatii():
         return redirect(url_for('login'))
     convs = Conversatie.query.order_by(Conversatie.data_ora.desc()).limit(100).all()
     return render_template("admin_conversatii.html", conversatii=convs)
+
+
+from sqlalchemy import func
+@app.route('/admin/statistici')
+def admin_statistici():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    statistici = db.session.query(
+        func.date(Conversatie.data_ora),
+        func.count(Conversatie.id)
+    ).group_by(func.date(Conversatie.data_ora)).all()
+    labels = [str(row[0]) for row in statistici]
+    values = [row[1] for row in statistici]
+    return render_template("admin_statistici.html", labels=labels, values=values)

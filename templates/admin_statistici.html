@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><head><title>Statistici AI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head><body class="bg-light">
+<div class="container py-5">
+    <h2>📊 Statistici AI - Activitate pe zile</h2>
+    <a href="/admin" class="btn btn-secondary btn-sm mb-4">Înapoi</a>
+    <canvas id="graficConversatii" height="100"></canvas>
+</div>
+<script>
+const ctx = document.getElementById('graficConversatii').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ labels|tojson }},
+        datasets: [{
+            label: 'Conversații / zi',
+            data: {{ values|tojson }},
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+</body></html>
